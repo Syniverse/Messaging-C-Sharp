@@ -1,0 +1,8 @@
+.vs/
+.vscode/
+**/obj/
+**/Properties/
+**/bin/
+**/obj/
+.old
+.tmp
