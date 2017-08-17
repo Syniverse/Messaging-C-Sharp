@@ -53,7 +53,7 @@ namespace ScgApi
             };
 
             if (baseUrl != null)
-                opts.BaseUrl = BaseUrl;
+                opts.BaseUrl = baseUrl;
 
             if (basePath != null)
                 opts.BasePath = basePath;
