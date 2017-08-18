@@ -19,31 +19,30 @@ namespace FunctionalTest
         }
 
         [Fact]
-        public void CreateGetList()
+        public async void CreateGetList()
         {
             var res = Attachment.Resource(Session);
             var att = CreateAttachment();
-            var id = res.Create(att).Result;
+            var id = await res.Create(att);
 
             Assert.NotEmpty(id);
 
             var att_res = res.Get(id);
-            var attInstance = att_res.Result;
+            var attInstance = await att_res;
 
             Assert.Equal(id, attInstance.Id);
 
             Assert.True(GetNumItems(res.List()) > 0);
 
-            var ok = res.Delete(id);
-            ok.Wait();
+            await res.Delete(id);
         }
 
         [Fact]
-        public void CreateAndUpload()
+        public async void CreateAndUpload()
         {
             var res = Attachment.Resource(Session);
             var att = CreateAttachment();
-            var id = res.Create(att).Result;
+            var id = await res.Create(att);
 
             Assert.NotEmpty(id);
             var path = System.IO.Path.GetTempPath() + Guid.NewGuid().ToString() + ".tmp";
@@ -51,8 +50,7 @@ namespace FunctionalTest
             try
             {
                 File.WriteAllText(path, "Test data");
-                var result = res.Upload(id, path);
-                result.Wait();
+                await res.Upload(id, path);
             } finally
             {
                 if (File.Exists(path))
@@ -62,12 +60,12 @@ namespace FunctionalTest
             }
 
             var att_res = res.Get(id);
-            var attInstance = att_res.Result;
+            var attInstance = await att_res;
 
             Assert.Equal(id, attInstance.Id);
             Assert.True(attInstance.Size.Value > 0);
 
-            res.Delete(id).Wait();
+            await res.Delete(id);
         }
     }
 }

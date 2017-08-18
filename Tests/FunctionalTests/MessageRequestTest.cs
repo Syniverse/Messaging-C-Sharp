@@ -9,20 +9,20 @@ namespace FunctionalTests
     public class MessageRequestTest : FunctionalTestBase
     {
         [Fact]
-        public void CreateGetListDelete()
+        public async void CreateGetListDelete()
         {
             var res = MessageRequest.Resource(Session);
-            String id = res.Create(new MessageRequest()
+            String id = await res.Create(new MessageRequest()
             {
                 From = "sender_id:" + Setup.senderIdSms,
                 To = new List<String>(){Setup.mdnRangeStart.ToString()},
                 Body = "Hello World",
                 TestMessageFlag = true
-            }).Result;
+            });
 
             Assert.NotEmpty(id);
 
-            var messageRequest = res.Get(id).Result;
+            var messageRequest = await res.Get(id);
 
             Assert.Equal(id, messageRequest.Id);
             Assert.Equal("Hello World", messageRequest.Body);
@@ -33,7 +33,7 @@ namespace FunctionalTests
             // list of messages contains 1 item.
             for (int i = 0; i < 60; i++)
             {
-                var mrq = res.Get(id).Result;
+                var mrq = await res.Get(id);
 
                 var readyStates = new List<String>() { "TRANSMITTING", "COMPLETED"};
                 if (readyStates.Contains(mrq.State))
@@ -49,28 +49,28 @@ namespace FunctionalTests
                 }
             }
 
-            res.Delete(id).Wait();
+            await res.Delete(id);
         }
 
         //// Broken?
         //[Fact]
-        //public void CreateResume()
+        //public async void CreateResume()
         //{
         //    var res = MessageRequest.Resource(Session);
-        //    String id = res.Create(new MessageRequest()
+        //    String id = await res.Create(new MessageRequest()
         //    {
         //        From = "sender_id:" + Setup.senderIdSms,
         //        To = new List<String>() { Setup.mdnRangeStart.ToString() },
         //        Body = "Hello World",
         //        PauseBeforeTransmit = true
-        //    }).Result;
+        //    });
 
         //    for(int i = 0; i < 60; i++)
         //    {
-        //        var mrq = res.Get(id).Result;
+        //        var mrq = await res.Get(id);
         //        if (mrq.State == "PAUSED")
         //        {
-        //            res.Resume(id).Wait();
+        //            await res.Resume(id);
         //            break;
         //        }
 

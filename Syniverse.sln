@@ -27,7 +27,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "send_sms_to_grp", "Examples
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "update_contact", "Examples\update_contact\update_contact.csproj", "{3A8E0CB2-8DD2-45FC-8C38-3E9E4DC07B86}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "add_contact", "Examples\add_contact\add_contact.csproj", "{01AE16CA-6ACB-4CCD-8243-7F7CF8A521C0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "add_contact", "Examples\add_contact\add_contact.csproj", "{01AE16CA-6ACB-4CCD-8243-7F7CF8A521C0}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{9CA5509B-BA4F-4160-B539-3E1EBF9D944D}"
 	ProjectSection(SolutionItems) = preProject

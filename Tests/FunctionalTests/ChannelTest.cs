@@ -9,7 +9,7 @@ namespace FunctionalTests
     public class ChannelTest : FunctionalTestBase
     {
         [Fact]
-        public void CreateGetListUpdateDelete()
+        public async void CreateGetListUpdateDelete()
         {
             var res = Channel.Resource(Session);
             var template = new Channel()
@@ -17,10 +17,10 @@ namespace FunctionalTests
                 Name = "ci-test"
             };
 
-            String id = res.Create(template).Result;
+            String id = await res.Create(template);
             Assert.NotEmpty(id);
 
-            var channel = res.Get(id).Result;
+            var channel = await res.Get(id);
 
             Assert.Equal(id, channel.Id);
             Assert.Equal("ci-test", channel.Name);
@@ -28,17 +28,17 @@ namespace FunctionalTests
             Assert.True(GetNumItems(res.List()) > 0);
 
             channel.Name = "Updated Name";
-            res.Update(channel.Id, channel).Wait();
+            await res.Update(channel.Id, channel);
 
-            var updatedChannel = res.Get(id).Result;
+            var updatedChannel = await res.Get(id);
             Assert.Equal(id, updatedChannel.Id);
             Assert.Equal("Updated Name", updatedChannel.Name);
 
-            res.Delete(id).Wait();
+            await res.Delete(id);
         }
 
         [Fact]
-        public void AddRemoveSenderId()
+        public async void AddRemoveSenderId()
         {
             var res = Channel.Resource(Session);
             var template = new Channel()
@@ -46,18 +46,18 @@ namespace FunctionalTests
                 Name = "ci-test"
             };
 
-            String id = res.Create(template).Result;
+            String id = await res.Create(template);
             Assert.NotEmpty(id);
 
-            res.AddSenderId(id, Setup.senderIdSms).Wait();
+            await res.AddSenderId(id, Setup.senderIdSms);
 
             Assert.Equal(1, GetNumItems(res.ListSenderIds(id)));
 
-            res.DeleteSenderId(id, Setup.senderIdSms).Wait();
+            await res.DeleteSenderId(id, Setup.senderIdSms);
 
             Assert.Equal(0, GetNumItems(res.ListSenderIds(id)));
 
-            res.Delete(id).Wait();
+            await res.Delete(id);
         }
     }
 }

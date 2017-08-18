@@ -11,11 +11,11 @@ namespace FunctionalTests
     {
 
         [Fact]
-        public void CreateUpdateDelete()
+        public async void CreateUpdateDelete()
         {
             // Remove any contact using the mdn we want.
             // If it exists, it's likely ti be a leftover from a failed test.
-            CleanUpMdn().Wait();
+            await CleanUpMdn();
 
             var res = Contact.Resource(Session);
             var template = new Contact()
@@ -25,32 +25,32 @@ namespace FunctionalTests
                 PrimaryMdn = Setup.mdnRangeStart.ToString()
             };
 
-            string id = res.Create(template).Result;
+            string id = await res.Create(template);
             Assert.NotEmpty(id);
 
             Assert.True(GetNumItems(res.List()) > 0);
 
-            var contact = res.Get(id).Result;
+            var contact = await res.Get(id);
 
             Assert.Equal(template.FirstName, contact.FirstName);
             Assert.Equal(template.LastName, contact.LastName);
             Assert.Equal(template.PrimaryMdn, contact.PrimaryMdn);
 
             contact.FirstName = "Bob";
-            res.Update(contact.Id, contact).Wait();
+            await res.Update(contact.Id, contact);
 
-            var updatedContact = res.Get(id).Result;
+            var updatedContact = await res.Get(id);
 
             Assert.Equal(contact.FirstName, updatedContact.FirstName);
             Assert.Equal(contact.LastName, updatedContact.LastName);
             Assert.Equal(contact.PrimaryMdn, updatedContact.PrimaryMdn);
 
-            res.Delete(id).Wait();
+            await res.Delete(id);
 
             var deleted = false;
             try
             {
-                res.Get(id).Wait();
+                await res.Get(id);
             } catch (Exception)
             {
                 deleted = true;

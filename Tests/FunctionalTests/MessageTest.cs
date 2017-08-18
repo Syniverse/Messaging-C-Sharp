@@ -4,26 +4,27 @@ using System.Text;
 using Xunit;
 using ScgApi;
 using System.IO;
+using System.Threading.Tasks;
 
 namespace FunctionalTests
 {
     public class MessageTest : FunctionalTestBase
     {
-        String CreateAttachment()
+        async Task<String> CreateAttachment()
         {
             var res = Attachment.Resource(Session);
-            var id = res.Create(new Attachment()
+            var id = await res.Create(new Attachment()
             {
                 Name = "test_upload",
                 Filename = "cutecat.jpg",
                 Type = "image/jpeg"
-            }).Result;
+            });
 
             var path = System.IO.Path.GetTempPath() + Guid.NewGuid().ToString() + ".tmp";
             try
             {
                 File.WriteAllText(path, "Cute Cat Payload");
-                res.Upload(id, path).Wait();
+                await res.Upload(id, path);
             }
             finally
             {
@@ -37,23 +38,23 @@ namespace FunctionalTests
         }
 
         [Fact]
-        public void SendMmsListDelete()
+        public async void SendMmsListDelete()
         {
-            String attachmentId = CreateAttachment();
+            String attachmentId = await CreateAttachment();
             var res = MessageRequest.Resource(Session);
-            String id = res.Create(new MessageRequest()
+            String id = await res.Create(new MessageRequest()
             {
                 From = "sender_id:" + Setup.senderIdSms,
                 To = new List<String>() { Setup.mdnRangeStart.ToString() },
                 Body = "Hello World",
                 Attachments = new List<String>() { attachmentId },
                 TestMessageFlag = true
-            }).Result;
+            });
 
             // If the server processed the request, verify the attachment
             for (int i = 0; i < 60; i++)
             {
-                var mrq = res.Get(id).Result;
+                var mrq = await res.Get(id);
 
                 var readyStates = new List<String>() { "TRANSMITTING", "COMPLETED" };
                 if (readyStates.Contains(mrq.State))

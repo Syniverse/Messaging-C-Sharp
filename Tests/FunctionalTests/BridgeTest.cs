@@ -9,7 +9,7 @@ namespace FunctionalTests
     public class BridgeTest : FunctionalTestBase
     {
         [Fact]
-        public void CreateGetLisstDelete()
+        public async void CreateGetLisstDelete()
         {
             var res = Bridge.Resource(Session);
             var template = new Bridge()
@@ -17,15 +17,15 @@ namespace FunctionalTests
                 CallIds = new List<string>()
             };
 
-            String id = res.Create(template).Result;
+            String id = await res.Create(template);
             Assert.NotEmpty(id);
 
-            var bridge = res.Get(id).Result;
+            var bridge = await res.Get(id);
             Assert.Equal(id, bridge.Id);
 
             Assert.True(GetNumItems(res.List()) > 0);
 
-            res.Delete(id).Wait();
+            await res.Delete(id);
         }
     }
 }

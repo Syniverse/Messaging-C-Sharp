@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace FunctionalTests
@@ -11,55 +12,53 @@ namespace FunctionalTests
         String bobId;
         String aliceId;
 
-        public ContactGroupTest()
-        {
-            CleanUpMdn(Setup.mdnRangeStart).Wait();
-            CleanUpMdn(Setup.mdnRangeStart + 1).Wait();
 
+        async Task CleanUpContacts()
+        {
+            await CleanUpMdn(Setup.mdnRangeStart);
+            await CleanUpMdn(Setup.mdnRangeStart + 1);
+        }
+
+        async Task PrepareContacts()
+        {
             var res = Contact.Resource(Session);
-            bobId = res.Create(new Contact()
+            bobId = await res.Create(new Contact()
             {
                 FirstName = "Bob",
                 PrimaryMdn = Setup.mdnRangeStart.ToString()
-            }).Result;
+            });
 
-            aliceId = res.Create(new Contact()
+            aliceId = await res.Create(new Contact()
             {
                 FirstName = "Alice",
                 PrimaryMdn = (Setup.mdnRangeStart + 1).ToString()
-            }).Result;
-        }
-
-        public new void Dispose()
-        {
-            var res = Contact.Resource(Session);
-            res.Delete(bobId).Wait();
-            res.Delete(aliceId).Wait();
-
-            base.Dispose();
+            });
         }
 
         [Fact]
-        public void CreateGetListUpdateDelete()
+        public async void CreateGetListUpdateDelete()
         {
+            await CleanUpContacts();
+            await PrepareContacts(); 
+
             var res = ContactGroup.Resource(Session);
 
-            String id = res.Create(new ContactGroup()
+            String id = await res.Create(new ContactGroup()
             {
                 Name = "ci-test"
-            }).Result;
+            });
 
             Assert.NotEmpty(id);
 
-            var cg = res.Get(id).Result;
+            var cg = await res.Get(id);
 
             Assert.Equal(id, cg.Id);
             Assert.Equal("ci-test", cg.Name);
 
             cg.Name = "Friends";
-            res.Update(id, cg).Wait();
+            await res.Update(id, cg);
 
-            var updatedCg = res.Get(id).Result;
+            var updatedCg = await res.Get(id);
 
             Assert.Equal(id, updatedCg.Id);
             Assert.Equal("Friends", updatedCg.Name);
@@ -67,20 +66,21 @@ namespace FunctionalTests
             Assert.True(GetNumItems(res.List()) > 0);
 
             Assert.Equal(0, GetNumItems(res.ListContacts(id)));
-            res.AddContact(id, bobId).Wait();
+            await res.AddContact(id, bobId);
             Assert.Equal(1, GetNumItems(res.ListContacts(id)));
-            res.AddContact(id, aliceId).Wait();
+            await res.AddContact(id, aliceId);
             Assert.Equal(2, GetNumItems(res.ListContacts(id)));
 
-            res.DeleteContact(id, bobId).Wait();
+            await res.DeleteContact(id, bobId);
             Assert.Equal(1, GetNumItems(res.ListContacts(id)));
 
-            res.DeleteContact(id, aliceId).Wait();
+            await res.DeleteContact(id, aliceId);
             Assert.Equal(0, GetNumItems(res.ListContacts(id)));
 
             Assert.True(GetNumItems(res.List()) > 0);
 
-            res.Delete(id).Wait();
+            await res.Delete(id);
+            await CleanUpContacts();
         }
     }
 }
